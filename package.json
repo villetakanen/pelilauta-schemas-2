@@ -1,0 +1,12 @@
+{
+  "name": "@11thd/pelilauta-schemas",
+  "version": "2.0.0-alpha.1",
+  "description": "The second version of Pelilauta schemas, now with extra Zod",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
