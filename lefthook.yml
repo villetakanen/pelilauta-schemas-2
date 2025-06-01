@@ -1,0 +1,45 @@
+# lefthook.yml
+# Documentation: https://github.com/evilmartians/lefthook/blob/master/docs/full_guide.md
+
+# You can choose to skip all hooks with LEFTHOOK=0 git commit ...
+# Or skip specific ones with SKIP_HOOKS=hook_name,another_name git commit ...
+
+pre-commit:
+  # Parallel execution can be enabled if commands are independent
+  parallel: true
+  commands:
+    biome-check:
+      # Run Biome on staged .ts and .tsx files
+      # {staged_files} is a placeholder that lefthook replaces with a list of staged files
+      # matching the glob. Biome can then operate on this list.
+      glob: "*.{js,ts,jsx,tsx}"
+      run: pnpm exec biome check --apply --no-errors-on-unmatched {staged_files}
+      stage_fixed: true # Automatically stage changes made by biome check --apply
+    vitest:
+      # Run Vitest related to staged files
+      # If you want to run on all files if any relevant file changed:
+      # run: pnpm test:related # or pnpm test:run if test:related proves tricky with lefthook's file passing
+      # For running on specific files passed by lefthook:
+      glob: "*.{js,ts,jsx,tsx}"
+      run: pnpm exec vitest run --related {staged_files}
+      # Note: vitest --related might need specific configuration or might not work as expected
+      # when files are passed directly this way.
+      # An alternative and often more reliable approach for tests on pre-commit:
+      # Run all tests if any of the relevant source/test files changed.
+      # This can be achieved by just running the test command without passing {staged_files} to it directly,
+      # relying on Vitest's own change detection or simply running a quick subset.
+      # Or, run all tests if any staged file matches the glob:
+      # run: pnpm test:run # This is safer to ensure all tests pass
+
+# commit-msg hook for commitlint will be added in the next phase
+commit-msg:
+  commands:
+    commitlint:
+      # Lefthook provides the commit message file path via an environment variable or argument
+      # For older lefthook versions it might be $1 or COMMIT_MSG_FILE.
+      # For newer versions, LEFTHOOK_COMMIT_MSG_PATH is common. Check lefthook docs if needed.
+      # The command `commitlint --edit` without an argument reads from .git/COMMIT_EDITMSG by default.
+      # Or explicitly:
+      run: pnpm exec commitlint --edit "{1}"
+      # Or using the env var if set by your lefthook version:
+      # run: pnpm exec commitlint --edit "$LEFTHOOK_COMMIT_MSG_PATH"
